@@ -1,0 +1,1 @@
+{"dependencies":{"@supabase/supabase-js":"^2.45.0","next":"^15.5.0","react":"^19.1.0","react-dom":"^19.1.0"},"name":"leadflow-crm","private":true,"scripts":{"build":"next build","dev":"next dev","start":"next start"},"version":"0.1.0"}
