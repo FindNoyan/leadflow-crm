@@ -122,7 +122,7 @@ supabase/schema.sql   Tables + Row Level Security policies
   so Row Level Security limits reads to their own rows. Retrieval in v1 is
   keyword/text matching over the user's own data, plus a small aggregate
   summary (totals, per-stage counts, overdue follow-ups). Gemini
-  (gemini-2.0-flash, via server-side REST fetch) answers only from that
+  (gemini-3.8-flash, via server-side REST fetch) answers only from that
   retrieved data, names the leads it used, and says plainly when the data
   does not contain the answer. Vector embeddings are a possible future
   upgrade, not part of v1.
