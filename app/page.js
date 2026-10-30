@@ -5,6 +5,7 @@ import { useLeads } from '../lib/useLeads';
 import { STAGES } from '../lib/demoData';
 import DemoBanner from '../components/DemoBanner';
 import LeadCard from '../components/LeadCard';
+import AiChat from '../components/AiChat';
 
 export default function DashboardPage() {
   const { mode, loading, leads } = useLeads();
@@ -46,6 +47,8 @@ export default function DashboardPage() {
           Open pipeline
         </Link>
       </div>
+
+      <AiChat />
 
       <h2>Recent leads</h2>
       {recent.length === 0 ? (

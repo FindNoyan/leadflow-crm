@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { STAGES } from '../lib/demoData';
+import ScoreBadge from './ScoreBadge';
 
 export default function LeadCard({ lead, showStageSelect, onStageChange }) {
   return (
@@ -14,6 +15,7 @@ export default function LeadCard({ lead, showStageSelect, onStageChange }) {
       {lead.service_needed ? <p className="lead-meta">{lead.service_needed}</p> : null}
       <div className="lead-footer">
         <span className="tag">{lead.source || 'Other'}</span>
+        <ScoreBadge lead={lead} />
         {lead.follow_up_date ? (
           <span className="tag warm">Follow-up: {lead.follow_up_date}</span>
         ) : null}

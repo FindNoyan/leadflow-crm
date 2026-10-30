@@ -4,7 +4,9 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useLeads } from '../lib/useLeads';
+import { supabase } from '../lib/supabaseClient';
 import { STAGES } from '../lib/demoData';
+import ScoreBadge from './ScoreBadge';
 
 export default function LeadDetail({ leadId }) {
   const router = useRouter();
@@ -13,6 +15,11 @@ export default function LeadDetail({ leadId }) {
   const [noteBody, setNoteBody] = useState('');
   const [formError, setFormError] = useState('');
   const [saving, setSaving] = useState(false);
+  const [draft, setDraft] = useState('');
+  const [draftIsDemo, setDraftIsDemo] = useState(false);
+  const [draftLoading, setDraftLoading] = useState(false);
+  const [draftError, setDraftError] = useState('');
+  const [copied, setCopied] = useState(false);
 
   const lead = leads.find((item) => item.id === leadId);
 
@@ -84,6 +91,44 @@ export default function LeadDetail({ leadId }) {
     }
   }
 
+  async function handleGenerateDraft() {
+    setDraftLoading(true);
+    setDraftError('');
+    setCopied(false);
+    try {
+      let token = null;
+      if (supabase) {
+        const { data } = await supabase.auth.getSession();
+        token = data.session?.access_token || null;
+      }
+      const response = await fetch('/api/ai/draft', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ leadId: lead.id }),
+      });
+      const json = await response.json();
+      if (!response.ok) throw new Error(json.error || 'Could not generate a draft.');
+      setDraft(json.draft);
+      setDraftIsDemo(Boolean(json.demo));
+    } catch (error) {
+      setDraftError(error.message);
+    } finally {
+      setDraftLoading(false);
+    }
+  }
+
+  async function handleCopyDraft() {
+    try {
+      await navigator.clipboard.writeText(draft);
+      setCopied(true);
+    } catch {
+      setDraftError('Could not copy. Select the draft text manually.');
+    }
+  }
+
   return (
     <div>
       <Link href="/leads" className="muted">
@@ -130,8 +175,39 @@ export default function LeadDetail({ leadId }) {
               onChange={handleFollowUpChange}
             />
           </label>
+          <p>
+            <strong>Priority:</strong> <ScoreBadge lead={lead} showReason />
+          </p>
           <button className="btn btn-danger" onClick={handleDelete}>
             Delete lead
+          </button>
+        </section>
+
+        <section className="form-card">
+          <h2>AI outreach draft</h2>
+          <p className="muted">
+            Generate a short personalized draft from this lead. You copy, edit,
+            and send it yourself. The AI never sends a message.
+          </p>
+          {draftError ? <p className="error">{draftError}</p> : null}
+          {draft ? (
+            <div>
+              {draftIsDemo ? (
+                <p className="demo-tag">Demo draft — AI is not configured.</p>
+              ) : null}
+              <p className="draft-box">{draft}</p>
+              <button className="btn btn-ghost" onClick={handleCopyDraft}>
+                {copied ? 'Copied' : 'Copy draft'}
+              </button>
+            </div>
+          ) : null}
+          <button
+            className="btn btn-primary"
+            onClick={handleGenerateDraft}
+            disabled={draftLoading}
+            style={{ marginTop: draft ? '12px' : '0' }}
+          >
+            {draftLoading ? 'Generating…' : 'Generate draft'}
           </button>
         </section>
 
